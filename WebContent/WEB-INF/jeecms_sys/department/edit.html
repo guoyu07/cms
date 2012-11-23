@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<title></title>
+<#include "/jeecms_sys/head.html"/>
+<script type="text/javascript">
+$(function() {
+	$("#jvForm").validate();
+	//栏目权限对话框
+	<#list siteList as site>
+	$("#channelDialog${site_index}").dialog({
+		autoOpen: false,
+		modal: true,
+		width: 280,
+		height: 420,
+		position: ["center",20],
+		buttons: {
+			"OK": function() {
+				$(this).dialog("close");
+			}
+		},
+		close: function(event, ui) {
+			//将列表框中已选中的项复制到隐藏表单中
+			var s="";
+			$("#channels${site_index}").children().each(function(){
+				if($(this).attr("selected")) {
+					s += "<input type='hidden' name='channelIds' value='" +$(this).val()+ "'/>";
+				}
+			});
+			$("#channelIdsContainer${site_index}").empty().append(s);
+		}
+	});
+	var channels_opened_${site_index} = false;
+	$('#channel${site_index}').click(function(){
+		//第一次打开，需要获取数据。
+		if(!channels_opened_${site_index}) {
+			//获取数据
+			$.get("v_channels_edit.do",{"siteId":${site.id},"departId":${department.id}},function(s) {
+				$(s).appendTo("#channels${site_index}");
+			});
+			channels_opened_${site_index} = true;
+		}
+		$('#channelDialog${site_index}').dialog('open');
+		return false;
+	});	
+	</#list>
+});
+function allChannels(chk,i) {
+	if(chk) {
+		$("#channels"+i).children().each(function(){$(this).attr("selected","selected")});
+	}else{
+		$("#channels"+i).children().each(function(){$(this).attr("selected","")});
+	} 
+}
+</script>
+</head>
+<body>
+<div class="box-positon">
+	<div class="rpos"><@s.m "global.position"/>: <@s.m "cms.department.function"/> - <@s.m "global.edit"/></div>
+	<form class="ropt">
+		<input type="submit" value="<@s.m "global.backToList"/>" onclick="this.form.action='v_list.do';" class="return-button"/>
+	</form>
+	<div class="clear"></div>
+</div>
+<div class="body-box">
+<@p.form id="jvForm" action="o_update.do" labelWidth="12">
+<@p.text colspan="2" width="50" label="cms.department.name" name="name" value=department.name required="true" class="required" maxlength="25"/><@p.tr/>
+<!-- 
+<@p.text colspan="2" width="50" label="cms.department.weights" help="cms.department.weights.help" name="weights" required="true" class="required digits" maxlength="10"/><@p.tr/>
+ 各个部门分开处理栏目权限已经其他权限，暂时权重失效
+ -->
+<input type="hidden" name="weights" value="1"/>
+<@p.text colspan="2" width="50" label="cms.department.priority" name="priority" value=department.priority required="true" class="required digits" maxlength="10"/><@p.tr/>
+<@p.checkboxlist colspan="2" label="department.guestbookctgs" name="ctgIds" valueList=ctgIds list=ctgList listKey="id" listValue="name"/><@p.tr/>
+<@p.td colspan="2" label="department.channels" required="true">
+	<#list siteList as site>
+	<div style="float:left;padding-right:3px">
+	<label>${site.shortName}</label>
+	<input class="channel-right" id="channel${site_index}" type="button" value="<@s.m "department.channels"/>"/>	
+		<span id="channelIdsContainer${site_index}">
+			<#list departChannelIds[site.id?string] as channelId>
+				<input type="hidden" name="channelIds" value="${channelId!}"/>
+			</#list>
+		</span>
+		<div id="channelDialog${site_index}" title="<@s.m "department.channels"/>(${site.name})" style="display:none;">
+			<label><input type="checkbox" onclick="allChannels(this.checked,${site_index})"/><@s.m "department.channels"/></label>
+			<select id="channels${site_index}"  multiple="multiple" size="15" style="width:100%;"></select>
+		</div>
+	</div>
+	</#list>
+	
+<div style="clear:both"></div>
+</@p.td><@p.tr/>
+<@p.td colspan="2">
+<@p.hidden name="id" value=department.id/>
+<@p.submit code="global.submit"/> &nbsp; <@p.reset code="global.reset"/>
+</@p.td>
+</@p.form>
+</div>
+</body>
+</html>

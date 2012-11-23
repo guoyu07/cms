@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<title></title>
+<#include "/jeecms_sys/head.html"/>
+<script type="text/javascript">
+$(function() {
+	$("#jvForm").validate();
+});
+function siteSelect(siteId){
+	$("#allChannels"+siteId).val($("#siteId_"+siteId).attr("checked"));
+	if($("#siteId_"+siteId).attr("checked")){
+			$("#step"+siteId).attr("disabled","");
+			$("#allChannelHide_"+siteId).attr("disabled","");
+			$("#allChannel_"+siteId).attr("disabled","");
+		}else{
+			$("#step"+siteId).attr("disabled","disabled");
+			$("#allChannelHide_"+siteId).attr("disabled","disabled");
+			$("#allChannel_"+siteId).attr("disabled","disabled");
+			}
+}
+function allChannelSelect(siteId){
+	$("#allChannelHide_"+siteId).val($("#allChannel_"+siteId).attr("checked"));
+}
+</script>
+</head>
+<body>
+<div class="box-positon">
+	<div class="rpos"><@s.m "global.position"/>: <@s.m "cmsAdminGlobal.function"/> - <@s.m "global.add"/></div>
+	<form class="ropt">
+		<input type="submit" value="<@s.m "global.backToList"/>" onclick="this.form.action='v_list.do';" class="return-button"/>
+	</form>
+	<div class="clear"></div>
+</div>
+<div class="body-box">
+<#assign usernameExist><@s.m "error.usernameExist"/></#assign>
+<@p.form id="jvForm" action="o_save.do" labelWidth="12">
+<@p.text width="50" colspan="1" label="cmsUser.username" name="username" required="true" maxlength="100" vld="{required:true,username:true,remote:'v_check_username.do',messages:{remote:'${usernameExist}'}}"/>
+<@p.text width="50" colspan="1" label="cmsUser.email" name="email" size="30" maxlength="100"  class="email"/><@p.tr/>
+<@p.password width="50" colspan="1" label="cmsUser.password" id="password" name="password" maxlength="100" class="required" required="true"/>
+<@p.password width="50" colspan="1" label="cmsUser.pwdAgain" equalTo="#password" required="true"/><@p.tr/>
+<@p.select width="50" colspan="1" label="cmsUser.group" name="groupId" list=groupList listKey="id" listValue="name" required="true"/>
+<@p.text width="50" colspan="1" label="cmsUser.rank" name="rank" value=currRank-1 style="width:70px" required="true" class="required digits" maxlength="5" max=currRank help="cmsUser.rank.help"/><@p.tr/>
+<@p.text width="50" colspan="1" label="cmsUser.realname" name="realname" maxlength="100"/>
+<@p.radio width="50" colspan="1" label="cmsUser.gender" name="gender" list={"true":"cmsUser.male","false":"cmsUser.female","":"cmsUser.secrecy"}/><@p.tr/>
+<@p.radio width="50" colspan="1" label="cmsUser.selfAdmin" name="selfAdmin" value="false" list={"true":"global.true","false":"global.false"} required="true" help="cmsUser.selfAdmin.help"/>
+<@p.radio width="50" colspan="1" label="cmsUser.viewonlyAdmin" name="viewonlyAdmin" value="false" list={"true":"global.true","false":"global.false"} required="true" help="cmsUser.viewonlyAdmin.help"/><@p.tr/>
+<@p.checkboxlist colspan="2" label="cmsUser.role" name="roleIds" list=roleList listKey="id" listValue="name"/><@p.tr/>
+<@p.checkboxlist colspan="2" label="cms.department" name="departIds" list=departmentList listKey="id" listValue="name"/><@p.tr/>
+<@p.td colspan="2" label="cmsUser.site">
+<#list siteList as site>
+<div style="float:left;padding-right:3px">
+	<label><input type="checkbox" name="siteIds" id="siteId_${site.id}" onclick="siteSelect('${site.id}')" value="${site.id}"/>${site.shortName}</label>
+	<input id="step${site.id}" type="text" name="steps" value="1"  min="1" max="127" class="required digits" style="width:40px"/>
+	<input name="allChannels" id="allChannelHide_${site.id}" value="false" type="hidden" />
+	<input type="checkbox" id="allChannel_${site.id}" onclick="allChannelSelect('${site.id}')"/>
+	<@s.m "cmsUser.allChannel"/>
+</div>
+</#list>
+<div style="clear:both"></div>
+</@p.td><@p.tr/>
+<@p.td colspan="2"><@p.submit code="global.submit"/> &nbsp; <@p.reset code="global.reset"/></@p.td>
+</@p.form>
+</div>
+</body>
+</html>
